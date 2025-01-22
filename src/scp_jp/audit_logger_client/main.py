@@ -34,3 +34,17 @@ class AuditLoggerClient:
             raise Exception(f"Failed to log: {response.text}")
 
         return True
+
+
+class PseudoAuditLoggerClient:
+    def __init__(self):
+        pass
+
+    def log(
+        self,
+        action: str,
+        message: str,
+        notes: str = "",
+        ip_address: str = "",
+    ) -> bool:
+        return True

@@ -1,6 +1,6 @@
 [project]
 name = "scp-jp-utils"
-version = "1.0.0"
+version = "1.0.1"
 authors = [{ name = "ukwhatn", email = "ukwhatn@gmail.com" }]
 description = "Package Template"
 readme = "README.md"
@@ -35,5 +35,5 @@ format = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/ukwhatn/pypi-package-template"
-"Bug Tracker" = "https://github.com/ukwhatn/pypi-package-template/issues"
+"Homepage" = "https://github.com/ukwhatn/audit-logger-api-client"
+"Bug Tracker" = "https://github.com/ukwhatn/audit-logger-api-client/issues"
