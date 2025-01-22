@@ -22,6 +22,7 @@ class AuditLoggerClient:
                 "Content-Type": "application/json",
             },
             json={
+                "app_name": self.app_name,
                 "action": action,
                 "message": message,
                 "notes": notes,
