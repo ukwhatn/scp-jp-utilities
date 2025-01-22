@@ -1,0 +1,36 @@
+[project]
+name = "pypi-package-template"
+version = "1.0.0"
+authors = [{ name = "ukwhatn", email = "ukwhatn@gmail.com" }]
+description = "Package Template"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+build = [
+    "build",
+    "twine",
+]
+lint = [
+    "flake8",
+    "mypy",
+    "isort",
+]
+format = [
+    "black",
+    "isort",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ukwhatn/pypi-package-template"
+"Bug Tracker" = "https://github.com/ukwhatn/pypi-package-template/issues"
