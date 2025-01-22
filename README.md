@@ -1,1 +1,1 @@
-# pypi package template
+# SCP-JP Utilities

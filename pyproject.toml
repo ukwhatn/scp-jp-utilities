@@ -1,5 +1,5 @@
 [project]
-name = "pypi-package-template"
+name = "scp-jp-utils"
 version = "1.0.0"
 authors = [{ name = "ukwhatn", email = "ukwhatn@gmail.com" }]
 description = "Package Template"
@@ -14,7 +14,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 
-dependencies = []
+dependencies = [
+    "httpx >= 0.28",
+    "fastapi >= 0.115.0"
+]
 
 [project.optional-dependencies]
 build = [
