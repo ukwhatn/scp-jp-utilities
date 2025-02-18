@@ -14,11 +14,11 @@ class WikidotUserClass:
 
 class WikidotIdPClient:
     def __init__(
-            self,
-            endpoint: str,
-            client_id: str,
-            client_secret: str,
-            redirect_uri: str,
+        self,
+        endpoint: str,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: str,
     ):
         self.endpoint = endpoint
         self.client_id = client_id
@@ -45,10 +45,10 @@ class WikidotIdPClient:
             raise ValueError("invalid code_challenge_method")
 
     def get_authorization_url(
-            self,
-            code_challenge_method: str,
-            code_challenge: str,
-            state: str,
+        self,
+        code_challenge_method: str,
+        code_challenge: str,
+        state: str,
     ) -> str:
         return (
             f"{self.endpoint}/authorize"
@@ -61,11 +61,7 @@ class WikidotIdPClient:
             f"&code_challenge_method={code_challenge_method}"
         )
 
-    def get_user(
-            self,
-            code: str,
-            code_verifier: str
-    ) -> WikidotUserClass:
+    def get_user(self, code: str, code_verifier: str) -> WikidotUserClass:
         userinfo_request = httpx.post(
             f"{self.endpoint}/user",
             json={
