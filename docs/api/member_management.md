@@ -12,10 +12,11 @@ pip install scp_jp_utilities
 
 ## 基本的な使い方
 
+### 非同期的な使用方法
+
 ```python
 from scp_jp.api.member_management import MemberManagementAPIClient
 
-# 非同期的な使用方法
 async def main():
     # クライアントの初期化
     client = MemberManagementAPIClient(
@@ -34,6 +35,44 @@ async def main():
 # 非同期関数の実行
 import asyncio
 asyncio.run(main())
+```
+
+### 同期的な使用方法
+
+`scp_jp.api.common` モジュールの `run_async` デコレータを使用すると、非同期メソッドを同期的に実行できます。
+
+```python
+from scp_jp.api.member_management import MemberManagementAPIClient
+from scp_jp.api.common import run_async, make_sync_client
+
+# 方法1: 同期クライアントの作成
+client = MemberManagementAPIClient(
+    base_url="https://member-management-api.example.com",
+    api_key="your_api_key_here"
+)
+# すべてのメソッドを同期的に使用できるようにラップ
+sync_client = make_sync_client(client)
+
+# 同期的にメソッドを呼び出し（awaitなし）
+sites = sync_client.get_sites()
+print(f"利用可能なサイト数: {len(sites)}")
+
+user = sync_client.get_user(user_id=123)
+print(f"ユーザー名: {user.name}")
+
+# 方法2: 個別のメソッドを同期的にラップ
+@run_async
+async def get_sites_sync(client):
+    return await client.get_sites()
+
+client = MemberManagementAPIClient(
+    base_url="https://member-management-api.example.com",
+    api_key="your_api_key_here"
+)
+
+# 同期的に非同期メソッドを実行
+sites = get_sites_sync(client)
+print(f"利用可能なサイト数: {len(sites)}")
 ```
 
 ## APIクラス
@@ -72,19 +111,13 @@ sites = await client.get_sites()
 ### サイトの作成
 
 ```python
-from scp_jp.api.member_management import SiteCreate
-
-site_data = SiteCreate(id=123, name="新しいサイト")
-new_site = await client.create_site(site_data)
+new_site = await client.create_site(site_id=123, name="新しいサイト")
 ```
 
 ### サイトの更新
 
 ```python
-from scp_jp.api.member_management import SiteUpdate
-
-site_data = SiteUpdate(name="更新されたサイト名")
-updated_site = await client.update_site(site_id=123, site_data=site_data)
+updated_site = await client.update_site(site_id=123, name="更新されたサイト名")
 ```
 
 ### サイトメンバー統計の取得
@@ -100,21 +133,20 @@ stats = await client.get_site_members_stats(
 ### サイトメンバーの権限更新
 
 ```python
-from scp_jp.api.member_management import SiteMemberPermissionUpdate, PermissionLevel
+from scp_jp.api.member_management import PermissionLevel
 
-permission_data = SiteMemberPermissionUpdate(
-    site_permission_level=PermissionLevel.ADMIN
-)
 updated_member = await client.update_site_member_permission(
     site_id=123,
     user_id=456,
-    permission_data=permission_data
+    site_permission_level=PermissionLevel.ADMIN
 )
 ```
 
 ### サイトメンバーの権限チェック
 
 ```python
+from scp_jp.api.member_management import PermissionLevel
+
 has_permission = await client.check_site_member_permission(
     site_id=123,
     user_id=456,
@@ -125,13 +157,10 @@ has_permission = await client.check_site_member_permission(
 ### サイトメンバーの外部サイト権限変更
 
 ```python
-from scp_jp.api.member_management import SiteMemberPrivilegeAction
-
-action_data = SiteMemberPrivilegeAction(action="to_admin")
 result = await client.change_site_member_privilege(
     site_id=123,
     user_id=456,
-    action_data=action_data
+    action="to_admin"
 )
 ```
 
@@ -140,27 +169,31 @@ result = await client.change_site_member_privilege(
 ### ユーザーの作成
 
 ```python
-from scp_jp.api.member_management import UserCreate
-from pydantic import HttpUrl
+from scp_jp.api.member_management import PermissionLevel
 
-user_data = UserCreate(
-    id=456,
+new_user = await client.create_user(
+    user_id=456,
     name="新しいユーザー",
     unix_name="new_user",
-    avatar_url=HttpUrl("https://example.com/avatar.jpg")
+    avatar_url="https://example.com/avatar.jpg",
+    is_deleted=False,
+    permission_level=PermissionLevel.VISITOR
 )
-new_user = await client.create_user(user_data)
 ```
 
 ### ユーザー一覧の取得（フィルタリング付き）
 
 ```python
+from scp_jp.api.member_management import PermissionLevel
+
 users = await client.get_users(
     per_page=50,
     page=1,
     order_by="name",
     order="asc",
-    permission_levels=[PermissionLevel.ADMIN, PermissionLevel.MODERATOR]
+    permission_levels=[PermissionLevel.ADMIN, PermissionLevel.MODERATOR],
+    is_deleted=False,
+    site_ids=[123, 456]
 )
 ```
 
@@ -173,27 +206,34 @@ user = await client.get_user(user_id=456)
 ### ユーザーの更新
 
 ```python
-from scp_jp.api.member_management import UserUpdate
+from scp_jp.api.member_management import PermissionLevel
 
-user_data = UserUpdate(name="更新されたユーザー名")
-updated_user = await client.update_user(user_id=456, user_data=user_data)
+updated_user = await client.update_user(
+    user_id=456,
+    name="更新されたユーザー名",
+    unix_name="updated_unix_name",
+    avatar_url="https://example.com/new_avatar.jpg",
+    is_deleted=False,
+    permission_level=PermissionLevel.MODERATOR
+)
 ```
 
 ### ユーザーの権限更新
 
 ```python
-from scp_jp.api.member_management import UserPermissionUpdate
+from scp_jp.api.member_management import PermissionLevel
 
-permission_data = UserPermissionUpdate(permission_level=PermissionLevel.ADMIN)
 updated_user = await client.update_user_permission(
     user_id=456,
-    permission_data=permission_data
+    permission_level=PermissionLevel.ADMIN
 )
 ```
 
 ### ユーザーの権限チェック
 
 ```python
+from scp_jp.api.member_management import PermissionLevel
+
 has_permission = await client.check_user_permission(
     user_id=456,
     permission_level=PermissionLevel.ADMIN
@@ -205,21 +245,23 @@ has_permission = await client.check_user_permission(
 ### 合言葉の作成
 
 ```python
-from scp_jp.api.member_management import ApplicationPasswordCreate
-
-password_data = ApplicationPasswordCreate(
+new_password = await client.create_application_password(
     site_id=123,
     password="新しい合言葉",
     is_enabled=True
 )
-new_password = await client.create_application_password(password_data)
 ```
 
 ### 合言葉一覧の取得（フィルタリング付き）
 
 ```python
 passwords = await client.get_application_passwords(
+    per_page=50,
+    page=1,
+    order_by="created_at",
+    order="desc",
     site_id=123,
+    password="合言葉",
     is_enabled=True
 )
 ```
@@ -233,12 +275,9 @@ updated_password = await client.toggle_application_password(password_id=789)
 ### 合言葉の更新
 
 ```python
-from scp_jp.api.member_management import ApplicationPasswordUpdate
-
-password_data = ApplicationPasswordUpdate(password="更新された合言葉")
 updated_password = await client.update_application_password(
     password_id=789,
-    password_data=password_data
+    password="更新された合言葉"
 )
 ```
 
@@ -247,9 +286,17 @@ updated_password = await client.update_application_password(
 ### 参加申請一覧の取得（フィルタリング付き）
 
 ```python
+from scp_jp.api.member_management import Status, DeclineReasonType
+
 requests = await client.get_application_requests(
+    per_page=50,
+    page=1,
+    order_by="created_at",
+    order="desc",
+    user_id=456,
     site_id=123,
-    statuses=[Status.PENDING]
+    statuses=[Status.PENDING],
+    decline_reason_types=[DeclineReasonType.INCORRECT_PASSWORD]
 )
 ```
 
@@ -268,40 +315,22 @@ request = await client.get_application_request(request_id=101)
 ### 参加申請の承認
 
 ```python
-from scp_jp.api.member_management import SiteApplicationAccept
-
-approval_data = SiteApplicationAccept(reviewer_id=456)
 result = await client.approve_application_request(
     request_id=101,
-    approval_data=approval_data
+    reviewer_id=456
 )
 ```
 
 ### 参加申請の拒否
 
 ```python
-from scp_jp.api.member_management import SiteApplicationDecline, DeclineReasonType
+from scp_jp.api.member_management import DeclineReasonType
 
-decline_data = SiteApplicationDecline(
+result = await client.decline_application_request(
+    request_id=101,
     reviewer_id=456,
     decline_reason_type=DeclineReasonType.INCORRECT_PASSWORD,
     decline_reason_detail="合言葉が不正確です"
-)
-result = await client.decline_application_request(
-    request_id=101,
-    decline_data=decline_data
-)
-```
-
-## 公開エンドポイント API
-
-### 公開パスワード（合言葉）の取得
-
-```python
-html_content = await client.get_public_password(
-    site_id=123,
-    user_id=456,
-    user_name="ユーザー名"
 )
 ```
 
@@ -341,13 +370,99 @@ class DeclineReasonType(IntEnum):
     OTHER = 9                                  # その他
 ```
 
+## データモデル
+
+### ユーザー関連
+
+```python
+class User(BaseModel):
+    id: int
+    name: str
+    unix_name: str
+    avatar_url: HttpUrl
+    is_deleted: bool = False
+    permission_level: PermissionLevel = PermissionLevel.VISITOR
+    created_at: datetime
+    updated_at: datetime
+
+class UserWithSiteMemberships(BaseModel):
+    id: int
+    name: str
+    unix_name: str
+    avatar_url: HttpUrl
+    is_deleted: bool = False
+    permission_level: PermissionLevel = PermissionLevel.VISITOR
+    site_memberships: List[Any]
+    created_at: datetime
+    updated_at: datetime
+```
+
+### サイト関連
+
+```python
+class Site(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+    updated_at: datetime
+
+class SiteWithMembersCount(BaseModel):
+    id: int
+    name: str
+    members_count: int
+    created_at: datetime
+    updated_at: datetime
+
+class SiteMember(BaseModel):
+    id: int
+    site_id: int
+    user_id: int
+    is_resigned: bool = False
+    site_permission_level: Optional[PermissionLevel] = None
+    effective_permission_level: PermissionLevel
+    joined_at: datetime
+    created_at: datetime
+    updated_at: datetime
+```
+
+### 合言葉関連
+
+```python
+class ApplicationPassword(BaseModel):
+    id: int
+    site_id: int
+    password: str
+    is_enabled: bool = True
+    created_at: datetime
+    updated_at: datetime
+```
+
+### 参加申請関連
+
+```python
+class SiteApplicationWithDetails(BaseModel):
+    id: int
+    status: Status
+    acquired_at: datetime
+    text: str
+    decline_reason_type: Optional[DeclineReasonType] = None
+    decline_reason_detail: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    reviewed_by: Optional[Dict[str, Any]] = None
+    site: Dict[str, Any]
+    user: Dict[str, Any]
+    password: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+```
+
 ## エラーハンドリング
 
 APIクライアントは、エラーが発生した場合に `httpx.HTTPStatusError` 例外を発生させます。これをキャッチして適切に処理することができます。
 
 ```python
 try:
-    site = await client.get_site(site_id=999)
+    site = await client.get_sites()
 except httpx.HTTPStatusError as e:
     if e.response.status_code == 404:
         print("サイトが見つかりませんでした")
@@ -357,6 +472,8 @@ except httpx.HTTPStatusError as e:
 
 ## 注意事項
 
-- このクライアントは非同期APIを使用しているため、`await` キーワードまたは `asyncio.run()` を使用して実行する必要があります。
+- このクライアントは基本的に非同期APIを使用しています。
+  - 非同期コンテキストでは `await` キーワードを使用して実行します。
+  - 同期的に使用するには、`run_async` デコレータか `make_sync_client` 関数を利用します。
 - API呼び出しにはヘッダーに有効なAPIキーが必要です。
-- 一部のエンドポイント（公開パスワードの取得など）は認証を必要としません。
+- `httpx` パッケージに依存しているため、インストールされていることを確認してください。

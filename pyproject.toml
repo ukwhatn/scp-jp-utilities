@@ -2,7 +2,7 @@
 name = "scp-jp-utils"
 version = "1.1.0"
 authors = [{ name = "ukwhatn", email = "ukwhatn@gmail.com" }]
-description = "Package Template"
+description = "SCP-JP management utilities"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -25,15 +25,13 @@ build = [
     "twine",
 ]
 lint = [
-    "flake8",
     "mypy",
-    "isort",
+    "ruff"
 ]
 format = [
-    "black",
-    "isort",
+    "ruff"
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/ukwhatn/audit-logger-api-client"
-"Bug Tracker" = "https://github.com/ukwhatn/audit-logger-api-client/issues"
+"Homepage" = "https://github.com/ukwhatn/scp-jp-utilities"
+"Bug Tracker" = "https://github.com/ukwhatn/scp-jp-utilities/issues"

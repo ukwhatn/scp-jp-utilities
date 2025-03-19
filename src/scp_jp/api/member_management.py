@@ -367,7 +367,9 @@ class MemberManagementAPIClient:
         Raises:
             httpx.HTTPStatusError: サイトまたはユーザーが見つからない場合、またはユーザーがサイトのメンバーでない場合（404）
         """
-        permission_data = SiteMemberPermissionUpdate(site_permission_level=site_permission_level)
+        permission_data = SiteMemberPermissionUpdate(
+            site_permission_level=site_permission_level
+        )
         response = await self._make_request(
             "PATCH",
             f"/v1/sites/{site_id}/members/{user_id}/permission",
@@ -430,13 +432,13 @@ class MemberManagementAPIClient:
 
     # Users endpoints
     async def create_user(
-        self, 
-        user_id: int, 
-        name: str, 
-        unix_name: str, 
-        avatar_url: str, 
-        is_deleted: bool = False, 
-        permission_level: PermissionLevel = PermissionLevel.VISITOR
+        self,
+        user_id: int,
+        name: str,
+        unix_name: str,
+        avatar_url: str,
+        is_deleted: bool = False,
+        permission_level: PermissionLevel = PermissionLevel.VISITOR,
     ) -> User:
         """
         新しいユーザーを作成します。
@@ -455,14 +457,14 @@ class MemberManagementAPIClient:
         Raises:
             httpx.HTTPStatusError: 指定されたIDのユーザーが既に存在する場合（400）
         """
-        from pydantic import HttpUrl
+
         user_data = UserCreate(
             id=user_id,
             name=name,
             unix_name=unix_name,
             avatar_url=HttpUrl(url=avatar_url),
             is_deleted=is_deleted,
-            permission_level=permission_level
+            permission_level=permission_level,
         )
         response = await self._make_request(
             "POST", "/v1/users/", json_data=user_data.model_dump()
@@ -542,13 +544,13 @@ class MemberManagementAPIClient:
         return UserWithSiteMemberships.model_validate(response.json())
 
     async def update_user(
-        self, 
-        user_id: int, 
-        name: Optional[str] = None, 
-        unix_name: Optional[str] = None, 
-        avatar_url: Optional[str] = None, 
-        is_deleted: Optional[bool] = None, 
-        permission_level: Optional[PermissionLevel] = None
+        self,
+        user_id: int,
+        name: Optional[str] = None,
+        unix_name: Optional[str] = None,
+        avatar_url: Optional[str] = None,
+        is_deleted: Optional[bool] = None,
+        permission_level: Optional[PermissionLevel] = None,
     ) -> User:
         """
         ユーザーを更新します。
@@ -573,13 +575,12 @@ class MemberManagementAPIClient:
         if unix_name is not None:
             user_data.unix_name = unix_name
         if avatar_url is not None:
-            from pydantic import HttpUrl
             user_data.avatar_url = HttpUrl(url=avatar_url)
         if is_deleted is not None:
             user_data.is_deleted = is_deleted
         if permission_level is not None:
             user_data.permission_level = permission_level
-            
+
         response = await self._make_request(
             "PATCH",
             f"/v1/users/{user_id}",
@@ -653,9 +654,7 @@ class MemberManagementAPIClient:
             httpx.HTTPStatusError: 指定されたIDのサイトが見つからない場合（404）
         """
         password_data = ApplicationPasswordCreate(
-            site_id=site_id,
-            password=password,
-            is_enabled=is_enabled
+            site_id=site_id, password=password, is_enabled=is_enabled
         )
         response = await self._make_request(
             "POST", "/v1/application/passwords/", json_data=password_data.model_dump()
@@ -864,7 +863,11 @@ class MemberManagementAPIClient:
             raise
 
     async def decline_application_request(
-        self, request_id: int, reviewer_id: int, decline_reason_type: DeclineReasonType, decline_reason_detail: str
+        self,
+        request_id: int,
+        reviewer_id: int,
+        decline_reason_type: DeclineReasonType,
+        decline_reason_detail: str,
     ) -> Dict[str, str]:
         """
         参加申請を拒否します。
@@ -885,7 +888,7 @@ class MemberManagementAPIClient:
             decline_data = SiteApplicationDecline(
                 reviewer_id=reviewer_id,
                 decline_reason_type=decline_reason_type,
-                decline_reason_detail=decline_reason_detail
+                decline_reason_detail=decline_reason_detail,
             )
             response = await self._make_request(
                 "POST",

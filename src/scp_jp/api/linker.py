@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import httpx
 from pydantic import BaseModel
@@ -10,6 +10,7 @@ class DiscordAccountSchema(BaseModel):
     """
     Discordアカウントのスキーマ
     """
+
     id: str
     username: str
     avatar: str
@@ -19,6 +20,7 @@ class DiscordAccountSchemaForManage(BaseModel):
     """
     Discordアカウントの管理用スキーマ
     """
+
     id: str
     username: str
     avatar: str
@@ -31,6 +33,7 @@ class AccountResponseWikidotBaseSchema(BaseModel):
     """
     Botにレスポンスとして渡すためのWikidotアカウント情報のスキーマ
     """
+
     id: int
     username: str
     unixname: str
@@ -41,6 +44,7 @@ class WikidotAccountSchemaForManage(BaseModel):
     """
     Wikidotアカウントの管理用スキーマ
     """
+
     id: int
     username: str
     unixname: str
@@ -54,6 +58,7 @@ class FlowStartRequestSchema(BaseModel):
     """
     FlowStartのリクエスト
     """
+
     discord: DiscordAccountSchema
 
 
@@ -61,6 +66,7 @@ class FlowStartResponseSchema(BaseModel):
     """
     FlowStartのレスポンス
     """
+
     url: str
 
 
@@ -68,6 +74,7 @@ class FlowRecheckRequestSchema(BaseModel):
     """
     FlowRecheckのリクエスト
     """
+
     discord: DiscordAccountSchema
 
 
@@ -75,6 +82,7 @@ class FlowRecheckResponseSchema(BaseModel):
     """
     FlowRecheckのレスポンス
     """
+
     discord: DiscordAccountSchema
     wikidot: List[AccountResponseWikidotBaseSchema]
 
@@ -83,6 +91,7 @@ class AccountResponseFromDiscordSchema(BaseModel):
     """
     Discord IDを主語として、関連するアカウント情報を返す
     """
+
     discord: DiscordAccountSchema
     wikidot: List[AccountResponseWikidotBaseSchema]
 
@@ -91,6 +100,7 @@ class AccountListRequestSchema(BaseModel):
     """
     AccountCheckのリクエスト
     """
+
     discord_ids: List[str]
 
 
@@ -98,6 +108,7 @@ class AccountListResponseSchema(BaseModel):
     """
     AccountCheckのレスポンス
     """
+
     result: Dict[str, AccountResponseFromDiscordSchema]
 
 
@@ -105,6 +116,7 @@ class ListDiscordItemSchema(BaseModel):
     """
     Discordアカウントのリストの要素
     """
+
     discord: DiscordAccountSchema
     wikidot: List[WikidotAccountSchemaForManage]
 
@@ -113,6 +125,7 @@ class ListDiscordResponseSchema(BaseModel):
     """
     Discordアカウントのリスト
     """
+
     result: List[ListDiscordItemSchema]
 
 
@@ -120,6 +133,7 @@ class ListWikidotItemSchema(BaseModel):
     """
     Wikidotアカウントのリストの要素
     """
+
     discord: List[DiscordAccountSchemaForManage]
     wikidot: AccountResponseWikidotBaseSchema
 
@@ -128,6 +142,7 @@ class ListWikidotResponseSchema(BaseModel):
     """
     Wikidotアカウントのリスト
     """
+
     result: List[ListWikidotItemSchema]
 
 
@@ -183,7 +198,9 @@ class LinkerAPIClient:
             return response
 
     # Flow endpoints
-    async def flow_start(self, discord_id: str, discord_username: str, discord_avatar: str) -> FlowStartResponseSchema:
+    async def flow_start(
+        self, discord_id: str, discord_username: str, discord_avatar: str
+    ) -> FlowStartResponseSchema:
         """
         連携フローを開始します。
 
@@ -195,7 +212,9 @@ class LinkerAPIClient:
         Returns:
             連携フロー開始レスポンス
         """
-        discord_data = DiscordAccountSchema(id=discord_id, username=discord_username, avatar=discord_avatar)
+        discord_data = DiscordAccountSchema(
+            id=discord_id, username=discord_username, avatar=discord_avatar
+        )
         request_data = FlowStartRequestSchema(discord=discord_data)
         response = await self._make_request(
             "POST", "/v1/start", json_data=request_data.model_dump()
@@ -231,7 +250,9 @@ class LinkerAPIClient:
         )
         return response.json()
 
-    async def flow_recheck(self, discord_id: str, discord_username: str, discord_avatar: str) -> FlowRecheckResponseSchema:
+    async def flow_recheck(
+        self, discord_id: str, discord_username: str, discord_avatar: str
+    ) -> FlowRecheckResponseSchema:
         """
         連携状態を再確認します。
 
@@ -243,7 +264,9 @@ class LinkerAPIClient:
         Returns:
             連携状態再確認レスポンス
         """
-        discord_data = DiscordAccountSchema(id=discord_id, username=discord_username, avatar=discord_avatar)
+        discord_data = DiscordAccountSchema(
+            id=discord_id, username=discord_username, avatar=discord_avatar
+        )
         request_data = FlowRecheckRequestSchema(discord=discord_data)
         response = await self._make_request(
             "POST", "/v1/recheck", json_data=request_data.model_dump()
@@ -300,9 +323,9 @@ class LinkerAPIClient:
             連携解除結果
         """
         response = await self._make_request(
-            "PATCH", 
-            "/v1/unlink", 
-            params={"discord_id": discord_id, "wikidot_id": wikidot_id}
+            "PATCH",
+            "/v1/unlink",
+            params={"discord_id": discord_id, "wikidot_id": wikidot_id},
         )
         return response.json()
 
@@ -318,9 +341,9 @@ class LinkerAPIClient:
             連携復活結果
         """
         response = await self._make_request(
-            "PATCH", 
-            "/v1/relink", 
-            params={"discord_id": discord_id, "wikidot_id": wikidot_id}
+            "PATCH",
+            "/v1/relink",
+            params={"discord_id": discord_id, "wikidot_id": wikidot_id},
         )
         return response.json()
 

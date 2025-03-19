@@ -26,12 +26,11 @@ commit:
 
 format:
 	pip install -e .[format]
-	python -m isort $(FORMAT_DIR)
-	python -m black $(FORMAT_DIR)
+	ruff format $(FORMAT_DIR)
 
 lint:
 	pip install -e .[lint]
-	python -m flake8 $(FORMAT_DIR)
+	ruff check $(FORMAT_DIR) --fix
 	python -m mypy $(FORMAT_DIR) --install-types --non-interactive
 
 PHONY: build release release_from-develop format commit
