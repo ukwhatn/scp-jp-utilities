@@ -274,7 +274,9 @@ class LinkerAPIClient:
         return FlowRecheckResponseSchema.model_validate(response.json())
 
     # Account listing endpoints
-    async def account_list(self, discord_ids: List[str]) -> AccountListResponseSchema:
+    async def account_list(
+        self, discord_ids: List[str | int]
+    ) -> AccountListResponseSchema:
         """
         Discord IDに紐づくアカウント情報を取得します。
 
@@ -284,7 +286,9 @@ class LinkerAPIClient:
         Returns:
             アカウントリストレスポンス
         """
-        request_data = AccountListRequestSchema(discord_ids=discord_ids)
+        request_data = AccountListRequestSchema(
+            discord_ids=[str(did) for did in discord_ids]
+        )
         response = await self._make_request(
             "POST", "/v1/list", json_data=request_data.model_dump()
         )
